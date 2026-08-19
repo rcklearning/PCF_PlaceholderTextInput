@@ -4,10 +4,9 @@
 
 // Define IInputs and IOutputs Type. They should match with ControlManifest.
 export interface IInputs {
-    multiline: ComponentFramework.PropertyTypes.TwoOptionsProperty;
+    multilineMode: ComponentFramework.PropertyTypes.TwoOptionsProperty;
     value: ComponentFramework.PropertyTypes.StringProperty;
-    placeholder: ComponentFramework.PropertyTypes.StringProperty;
-    rows: ComponentFramework.PropertyTypes.WholeNumberProperty;
+    placeholderText: ComponentFramework.PropertyTypes.StringProperty;
 }
 export interface IOutputs {
     value?: string;
