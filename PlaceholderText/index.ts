@@ -48,6 +48,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     this.textarea.addEventListener("compositionend", () => {
       this.isComposing = false;
       this.handleInput();
+      this.autoResize();
     });
 
     this.host.appendChild(this.input);
@@ -59,8 +60,14 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
 
     const activeControl = this.isMultiline ? this.textarea : this.input;
     this.currentValue = activeControl.value;
+    if (this.isMultiline) this.autoResize();
     this.notifyOutputChanged();
   };
+
+  private autoResize(): void {
+    this.textarea.style.height = "auto";
+    this.textarea.style.height = `${this.textarea.scrollHeight}px`;
+  }
 
   public updateView(context: ComponentFramework.Context<IInputs>): void {
     const value = context.parameters.value.raw ?? "";
@@ -77,11 +84,6 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     activeControl.placeholder = placeholder;
     activeControl.disabled = context.mode.isControlDisabled;
 
-    if (this.isMultiline) {
-      const rows = context.parameters.rows.raw ?? 3;
-      this.textarea.rows = Math.max(1, rows);
-    }
-
     const isFocused = document.activeElement === activeControl;
 
     // Only sync external value into the DOM when user is not actively editing.
@@ -89,6 +91,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     if (!isFocused && activeControl.value !== value) {
       activeControl.value = value;
       this.currentValue = value;
+      if (this.isMultiline) this.autoResize();
     }
 
     // Track the last value received from the framework

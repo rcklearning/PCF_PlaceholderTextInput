@@ -7,7 +7,6 @@ export interface IInputs {
     multiline: ComponentFramework.PropertyTypes.TwoOptionsProperty;
     value: ComponentFramework.PropertyTypes.StringProperty;
     placeholder: ComponentFramework.PropertyTypes.StringProperty;
-    rows: ComponentFramework.PropertyTypes.WholeNumberProperty;
 }
 export interface IOutputs {
     value?: string;

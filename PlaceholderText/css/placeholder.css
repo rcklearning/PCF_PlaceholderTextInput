@@ -30,6 +30,8 @@
 }
 
 .evidi-placeholder-textarea {
-  resize: vertical;
-  min-height: 24px;
+  resize: none;
+  overflow: hidden;
+  height: auto;
+  min-height: 36px;
 }

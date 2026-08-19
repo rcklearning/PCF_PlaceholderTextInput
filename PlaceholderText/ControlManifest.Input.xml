@@ -39,15 +39,6 @@
       usage="input"
       required="false" />
 
-      <!-- Optional: textarea rows -->
-    <property
-      name="rows"
-      display-name-key="Rows_DisplayName"
-      description-key="Rows_Description"
-      of-type="Whole.None"
-      usage="input"
-      required="false" />
-
     <resources>
       <code path="index.ts" order="1"/>
       <css path="css/placeholder.css" order="1" />
