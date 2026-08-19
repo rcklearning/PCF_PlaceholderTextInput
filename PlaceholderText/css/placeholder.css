@@ -2,15 +2,18 @@
   width: 100%;
   box-sizing: border-box;
 
-  background: #f3f2f1;
+  background: #faf9f8;
 
-  border-radius: 2px;
+  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #605e5c;
 
-  padding: 6px 8px;
+  padding: 4px 8px;
+
+  transition: border-bottom-color 0.1s ease;
 }
 
 .evidi-field-host:focus-within {
-  border-color: #0078d4;
+  border-bottom: 2px solid #0078d4;
 }
 
 .evidi-placeholder-input,
@@ -19,6 +22,7 @@
   box-sizing: border-box;
 
   font: inherit;
+  font-size: 14px;
   color: inherit;
 
   background: transparent !important;
@@ -27,6 +31,17 @@
 
   padding: 0;
   margin: 0;
+}
+
+.evidi-placeholder-input::placeholder,
+.evidi-placeholder-textarea::placeholder {
+  color: #605e5c;
+}
+
+.evidi-placeholder-input:disabled,
+.evidi-placeholder-textarea:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .evidi-placeholder-textarea {

@@ -7,9 +7,9 @@
     </external-service-usage>
    
     <property
-  name="multiline"
-  display-name-key="Multiline_DisplayName"
-  description-key="Multiline_Description"
+  name="multilineMode"
+  display-name-key="MultilineMode_DisplayName"
+  description-key="MultilineMode_Description"
   of-type="TwoOptions"
   usage="input"
   required="false" />
@@ -32,9 +32,9 @@
     </type-group>
      <!-- Maker-configurable placeholder -->
     <property
-      name="placeholder"
-      display-name-key="Placeholder_DisplayName"
-      description-key="Placeholder_Description"
+      name="placeholderText"
+      display-name-key="PlaceholderText_DisplayName"
+      description-key="PlaceholderText_Description"
       of-type="SingleLine.TextArea"
       usage="input"
       required="false" />

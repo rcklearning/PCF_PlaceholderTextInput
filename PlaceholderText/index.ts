@@ -71,8 +71,8 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
 
   public updateView(context: ComponentFramework.Context<IInputs>): void {
     const value = context.parameters.value.raw ?? "";
-    const placeholder = context.parameters.placeholder.raw ?? "";
-    const shouldBeMultiline = context.parameters.multiline?.raw === true;
+    const placeholder = context.parameters.placeholderText.raw ?? "";
+    const shouldBeMultiline = context.parameters.multilineMode?.raw === true;
 
     if (shouldBeMultiline !== this.isMultiline) {
       this.isMultiline = shouldBeMultiline;
