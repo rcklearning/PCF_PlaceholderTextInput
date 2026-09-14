@@ -1,4 +1,5 @@
 .evidi-field-host {
+  position: relative;
   width: 100%;
   box-sizing: border-box;
 
@@ -16,6 +17,28 @@
   border-bottom: 2px solid #0078d4;
 }
 
+.evidi-placeholder-overlay {
+  position: absolute;
+  inset: 4px 8px;
+  color: #605e5c;
+  pointer-events: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.evidi-placeholder-overlay.disabled {
+  opacity: 0.4;
+}
+
+.evidi-placeholder-overlay p {
+  margin: 0;
+}
+
+.evidi-placeholder-overlay ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
 .evidi-placeholder-input,
 .evidi-placeholder-textarea {
   width: 100%;
@@ -30,11 +53,6 @@
 
   padding: 0;
   margin: 0;
-}
-
-.evidi-placeholder-input::placeholder,
-.evidi-placeholder-textarea::placeholder {
-  color: #605e5c;
 }
 
 .evidi-placeholder-input:disabled,

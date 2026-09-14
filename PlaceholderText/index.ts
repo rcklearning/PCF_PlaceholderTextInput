@@ -3,6 +3,7 @@ import { IInputs, IOutputs } from "./generated/ManifestTypes";
 export class PlaceholderText implements ComponentFramework.StandardControl<IInputs, IOutputs> {
   private container!: HTMLDivElement;
   private host!: HTMLDivElement;
+  private placeholderOverlay!: HTMLDivElement;
 
   private input!: HTMLInputElement;
   private textarea!: HTMLTextAreaElement;
@@ -24,6 +25,10 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
 
     this.host = document.createElement("div");
     this.host.className = "evidi-field-host";
+
+    this.placeholderOverlay = document.createElement("div");
+    this.placeholderOverlay.className = "evidi-placeholder-overlay";
+    this.placeholderOverlay.setAttribute("aria-hidden", "true");
 
     this.input = document.createElement("input");
     this.input.type = "text";
@@ -51,7 +56,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
       this.autoResize();
     });
 
-    this.host.appendChild(this.input);
+    this.host.append(this.input, this.placeholderOverlay);
     this.container.appendChild(this.host);
   }
 
@@ -61,6 +66,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     const activeControl = this.isMultiline ? this.textarea : this.input;
     this.currentValue = activeControl.value;
     if (this.isMultiline) this.autoResize();
+    this.syncPlaceholderVisibility();
     this.notifyOutputChanged();
   };
 
@@ -76,13 +82,15 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
 
     if (shouldBeMultiline !== this.isMultiline) {
       this.isMultiline = shouldBeMultiline;
-      this.host.replaceChildren(this.isMultiline ? this.textarea : this.input);
+      this.host.replaceChildren(this.isMultiline ? this.textarea : this.input, this.placeholderOverlay);
     }
 
     const activeControl = this.isMultiline ? this.textarea : this.input;
 
-    activeControl.placeholder = placeholder;
+    activeControl.placeholder = "";
     activeControl.disabled = context.mode.isControlDisabled;
+    this.placeholderOverlay.classList.toggle("disabled", context.mode.isControlDisabled);
+    this.renderPlaceholder(placeholder);
 
     const isFocused = document.activeElement === activeControl;
 
@@ -93,6 +101,8 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
       this.currentValue = value;
       if (this.isMultiline) this.autoResize();
     }
+
+    this.syncPlaceholderVisibility();
 
     // Track the last value received from the framework
     this.lastContextValue = value;
@@ -108,6 +118,60 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
 
     this.input?.remove();
     this.textarea?.remove();
+    this.placeholderOverlay?.remove();
     this.host?.remove();
+  }
+
+  private renderPlaceholder(rawPlaceholder: string): void {
+    this.placeholderOverlay.innerHTML = this.sanitizePlaceholder(rawPlaceholder);
+  }
+
+  private syncPlaceholderVisibility(): void {
+    const activeControl = this.isMultiline ? this.textarea : this.input;
+    this.placeholderOverlay.style.display = activeControl.value.length > 0 ? "none" : "block";
+  }
+
+  private sanitizePlaceholder(value: string): string {
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(`<div>${value}</div>`, "text/html");
+    const sourceRoot = parsed.body.firstElementChild;
+    if (!sourceRoot) return "";
+
+    const safeDoc = document.implementation.createHTMLDocument("");
+    const safeRoot = safeDoc.createElement("div");
+    const allowedTags = new Set(["P", "BR", "B", "I", "UL", "LI"]);
+
+    const sanitizeNode = (node: Node): Node | null => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return safeDoc.createTextNode(node.textContent ?? "");
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return null;
+      }
+
+      const element = node as HTMLElement;
+      const cleanContainer = safeDoc.createDocumentFragment();
+
+      for (const childNode of Array.from(element.childNodes)) {
+        const cleanChild = sanitizeNode(childNode);
+        if (cleanChild) cleanContainer.appendChild(cleanChild);
+      }
+
+      if (!allowedTags.has(element.tagName)) {
+        return cleanContainer;
+      }
+
+      const safeElement = safeDoc.createElement(element.tagName.toLowerCase());
+      safeElement.appendChild(cleanContainer);
+      return safeElement;
+    };
+
+    for (const childNode of Array.from(sourceRoot.childNodes)) {
+      const cleanNode = sanitizeNode(childNode);
+      if (cleanNode) safeRoot.appendChild(cleanNode);
+    }
+
+    return safeRoot.innerHTML;
   }
 }
