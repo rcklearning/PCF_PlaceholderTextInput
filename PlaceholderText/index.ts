@@ -2,6 +2,7 @@ import { IInputs, IOutputs } from "./generated/ManifestTypes";
 
 export class PlaceholderText implements ComponentFramework.StandardControl<IInputs, IOutputs> {
   private static nextAccessibleDescriptionId = 0;
+  private static readonly defaultFieldHeightPx = 36;
 
   private container!: HTMLDivElement;
   private host!: HTMLDivElement;
@@ -19,13 +20,14 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
   private readonly accessibleDescriptionId = `evidi-placeholder-description-${PlaceholderText.nextAccessibleDescriptionId++}`;
 
   public init(
-    _context: ComponentFramework.Context<IInputs>,
+    context: ComponentFramework.Context<IInputs>,
     notifyOutputChanged: () => void,
     _state: ComponentFramework.Dictionary,
     container: HTMLDivElement
   ): void {
     this.container = container;
     this.notifyOutputChanged = notifyOutputChanged;
+    context.mode.trackContainerResize(true);
 
     this.host = document.createElement("div");
     this.host.className = "evidi-field-host";
@@ -94,6 +96,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     }
 
     const activeControl = this.isMultiline ? this.textarea : this.input;
+    this.applyControlHeight(context);
 
     activeControl.placeholder = "";
     activeControl.disabled = context.mode.isControlDisabled;
@@ -107,8 +110,8 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     if (!isFocused && activeControl.value !== value) {
       activeControl.value = value;
       this.currentValue = value;
-      if (this.isMultiline) this.autoResize();
     }
+    if (this.isMultiline) this.autoResize();
 
     this.syncPlaceholderVisibility();
 
@@ -193,5 +196,24 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     }
 
     return safeRoot.innerHTML;
+  }
+
+  private applyControlHeight(context: ComponentFramework.Context<IInputs>): void {
+    const configuredHeight = this.normalizeHeight(context.parameters.fieldHeightPx?.raw);
+    const hostAllocatedHeight = this.normalizeHeight(context.mode.allocatedHeight);
+    const effectiveHeight = configuredHeight ?? hostAllocatedHeight ?? PlaceholderText.defaultFieldHeightPx;
+
+    const height = `${effectiveHeight}px`;
+    this.host.style.minHeight = height;
+    this.input.style.minHeight = height;
+    this.textarea.style.minHeight = height;
+  }
+
+  private normalizeHeight(value: number | null | undefined): number | undefined {
+    if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+      return undefined;
+    }
+
+    return Math.round(value);
   }
 }
