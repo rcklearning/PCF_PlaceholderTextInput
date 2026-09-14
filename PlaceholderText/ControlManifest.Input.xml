@@ -14,6 +14,13 @@
   usage="input"
   required="false" />
     <property
+      name="fieldHeightPx"
+      display-name-key="FieldHeightPx_DisplayName"
+      description-key="FieldHeightPx_Description"
+      of-type="Whole.None"
+      usage="input"
+      required="false" />
+    <property
       name="value"
       display-name-key="Value_DisplayName"
       description-key="Value_Description"

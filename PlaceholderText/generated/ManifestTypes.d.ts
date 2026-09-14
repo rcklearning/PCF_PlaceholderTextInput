@@ -5,6 +5,7 @@
 // Define IInputs and IOutputs Type. They should match with ControlManifest.
 export interface IInputs {
     multilineMode: ComponentFramework.PropertyTypes.TwoOptionsProperty;
+    fieldHeightPx: ComponentFramework.PropertyTypes.WholeNumberProperty;
     value: ComponentFramework.PropertyTypes.StringProperty;
     placeholderText: ComponentFramework.PropertyTypes.StringProperty;
 }
