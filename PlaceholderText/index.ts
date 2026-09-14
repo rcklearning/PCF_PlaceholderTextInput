@@ -11,6 +11,8 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
   private notifyOutputChanged!: () => void;
   private currentValue = "";
   private lastContextValue = "";
+  private accessiblePlaceholder = "";
+  private hasPlaceholderContent = false;
   private isMultiline = false;
   private isComposing = false;
 
@@ -35,6 +37,8 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     this.input.className = "evidi-placeholder-input";
 
     this.input.addEventListener("input", this.handleInput);
+    this.input.addEventListener("focus", this.handleFocusChange);
+    this.input.addEventListener("blur", this.handleFocusChange);
     this.input.addEventListener("compositionstart", () => {
       this.isComposing = true;
     });
@@ -47,6 +51,8 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     this.textarea.className = "evidi-placeholder-textarea";
 
     this.textarea.addEventListener("input", this.handleInput);
+    this.textarea.addEventListener("focus", this.handleFocusChange);
+    this.textarea.addEventListener("blur", this.handleFocusChange);
     this.textarea.addEventListener("compositionstart", () => {
       this.isComposing = true;
     });
@@ -70,6 +76,10 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     this.notifyOutputChanged();
   };
 
+  private handleFocusChange = (): void => {
+    this.syncPlaceholderVisibility();
+  };
+
   private autoResize(): void {
     this.textarea.style.height = "auto";
     this.textarea.style.height = `${this.textarea.scrollHeight}px`;
@@ -87,10 +97,10 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
 
     const activeControl = this.isMultiline ? this.textarea : this.input;
 
-    activeControl.placeholder = "";
+    this.renderPlaceholder(placeholder);
+    activeControl.placeholder = this.accessiblePlaceholder;
     activeControl.disabled = context.mode.isControlDisabled;
     this.placeholderOverlay.classList.toggle("disabled", context.mode.isControlDisabled);
-    this.renderPlaceholder(placeholder);
 
     const isFocused = document.activeElement === activeControl;
 
@@ -114,7 +124,11 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
 
   public destroy(): void {
     this.input.removeEventListener("input", this.handleInput);
+    this.input.removeEventListener("focus", this.handleFocusChange);
+    this.input.removeEventListener("blur", this.handleFocusChange);
     this.textarea.removeEventListener("input", this.handleInput);
+    this.textarea.removeEventListener("focus", this.handleFocusChange);
+    this.textarea.removeEventListener("blur", this.handleFocusChange);
 
     this.input?.remove();
     this.textarea?.remove();
@@ -123,12 +137,17 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
   }
 
   private renderPlaceholder(rawPlaceholder: string): void {
-    this.placeholderOverlay.innerHTML = this.sanitizePlaceholder(rawPlaceholder);
+    const safeMarkup = this.sanitizePlaceholder(rawPlaceholder);
+    this.placeholderOverlay.innerHTML = safeMarkup;
+    this.accessiblePlaceholder = this.toPlainText(safeMarkup);
+    this.hasPlaceholderContent = this.accessiblePlaceholder.trim().length > 0;
   }
 
   private syncPlaceholderVisibility(): void {
     const activeControl = this.isMultiline ? this.textarea : this.input;
-    this.placeholderOverlay.style.display = activeControl.value.length > 0 ? "none" : "block";
+    const isFocused = document.activeElement === activeControl;
+    const shouldShow = this.hasPlaceholderContent && activeControl.value.length === 0 && !isFocused;
+    this.placeholderOverlay.style.display = shouldShow ? "block" : "none";
   }
 
   private sanitizePlaceholder(value: string): string {
@@ -173,5 +192,11 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     }
 
     return safeRoot.innerHTML;
+  }
+
+  private toPlainText(html: string): string {
+    const tempContainer = document.createElement("div");
+    tempContainer.innerHTML = html;
+    return tempContainer.textContent ?? "";
   }
 }
