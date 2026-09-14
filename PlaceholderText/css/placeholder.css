@@ -22,6 +22,7 @@
   inset: 4px 8px;
   color: #605e5c;
   pointer-events: none;
+  text-align: left;
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
