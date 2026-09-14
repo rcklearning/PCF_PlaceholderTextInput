@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="Evidi" constructor="PlaceholderText" version="0.0.2" display-name-key="PlaceholderText" description-key="PlaceholderText description" control-type="standard" >
+  <control namespace="Evidi" constructor="PlaceholderTextUpdated" version="0.1.2" display-name-key="PlaceholderTextUpdated" description-key="PlaceholderTextUpdated description" control-type="standard" >
    
     <external-service-usage enabled="false">
     

@@ -1,6 +1,6 @@
 import { IInputs, IOutputs } from "./generated/ManifestTypes";
 
-export class PlaceholderText implements ComponentFramework.StandardControl<IInputs, IOutputs> {
+export class PlaceholderTextUpdated implements ComponentFramework.StandardControl<IInputs, IOutputs> {
   private static nextAccessibleDescriptionId = 0;
   private static readonly defaultFieldHeightPx = 36;
 
@@ -17,7 +17,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
   private lastContextValue = "";
   private isMultiline = false;
   private isComposing = false;
-  private readonly accessibleDescriptionId = `evidi-placeholder-description-${PlaceholderText.nextAccessibleDescriptionId++}`;
+  private readonly accessibleDescriptionId = `evidi-placeholder-description-${PlaceholderTextUpdated.nextAccessibleDescriptionId++}`;
 
   public init(
     context: ComponentFramework.Context<IInputs>,
@@ -201,7 +201,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
   private applyControlHeight(context: ComponentFramework.Context<IInputs>): void {
     const configuredHeight = this.normalizeHeight(context.parameters.fieldHeightPx?.raw);
     const hostAllocatedHeight = this.normalizeHeight(context.mode.allocatedHeight);
-    const effectiveHeight = configuredHeight ?? hostAllocatedHeight ?? PlaceholderText.defaultFieldHeightPx;
+    const effectiveHeight = configuredHeight ?? hostAllocatedHeight ?? PlaceholderTextUpdated.defaultFieldHeightPx;
 
     const height = `${effectiveHeight}px`;
     this.host.style.minHeight = height;
