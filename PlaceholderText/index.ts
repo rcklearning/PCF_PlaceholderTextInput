@@ -1,9 +1,12 @@
 import { IInputs, IOutputs } from "./generated/ManifestTypes";
 
 export class PlaceholderText implements ComponentFramework.StandardControl<IInputs, IOutputs> {
+  private static nextAccessibleDescriptionId = 0;
+
   private container!: HTMLDivElement;
   private host!: HTMLDivElement;
   private placeholderOverlay!: HTMLDivElement;
+  private accessibleDescription!: HTMLDivElement;
 
   private input!: HTMLInputElement;
   private textarea!: HTMLTextAreaElement;
@@ -13,6 +16,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
   private lastContextValue = "";
   private isMultiline = false;
   private isComposing = false;
+  private readonly accessibleDescriptionId = `evidi-placeholder-description-${PlaceholderText.nextAccessibleDescriptionId++}`;
 
   public init(
     _context: ComponentFramework.Context<IInputs>,
@@ -29,6 +33,10 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     this.placeholderOverlay = document.createElement("div");
     this.placeholderOverlay.className = "evidi-placeholder-overlay";
     this.placeholderOverlay.setAttribute("aria-hidden", "true");
+
+    this.accessibleDescription = document.createElement("div");
+    this.accessibleDescription.className = "evidi-screenreader-only";
+    this.accessibleDescription.id = this.accessibleDescriptionId;
 
     this.input = document.createElement("input");
     this.input.type = "text";
@@ -56,7 +64,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
       this.autoResize();
     });
 
-    this.host.append(this.input, this.placeholderOverlay);
+    this.host.append(this.input, this.placeholderOverlay, this.accessibleDescription);
     this.container.appendChild(this.host);
   }
 
@@ -82,7 +90,7 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
 
     if (shouldBeMultiline !== this.isMultiline) {
       this.isMultiline = shouldBeMultiline;
-      this.host.replaceChildren(this.isMultiline ? this.textarea : this.input, this.placeholderOverlay);
+      this.host.replaceChildren(this.isMultiline ? this.textarea : this.input, this.placeholderOverlay, this.accessibleDescription);
     }
 
     const activeControl = this.isMultiline ? this.textarea : this.input;
@@ -119,16 +127,28 @@ export class PlaceholderText implements ComponentFramework.StandardControl<IInpu
     this.input?.remove();
     this.textarea?.remove();
     this.placeholderOverlay?.remove();
+    this.accessibleDescription?.remove();
     this.host?.remove();
   }
 
   private renderPlaceholder(rawPlaceholder: string): void {
-    this.placeholderOverlay.innerHTML = this.sanitizePlaceholder(rawPlaceholder);
+    const sanitizedPlaceholder = this.sanitizePlaceholder(rawPlaceholder);
+    this.placeholderOverlay.innerHTML = sanitizedPlaceholder;
+    this.accessibleDescription.innerHTML = sanitizedPlaceholder;
   }
 
   private syncPlaceholderVisibility(): void {
     const activeControl = this.isMultiline ? this.textarea : this.input;
-    this.placeholderOverlay.style.display = activeControl.value.length > 0 ? "none" : "block";
+    const shouldShowPlaceholder = activeControl.value.length === 0;
+    const hasAccessibleDescription = (this.accessibleDescription.textContent ?? "").trim().length > 0;
+
+    this.placeholderOverlay.style.display = shouldShowPlaceholder ? "block" : "none";
+    this.input.removeAttribute("aria-describedby");
+    this.textarea.removeAttribute("aria-describedby");
+
+    if (shouldShowPlaceholder && hasAccessibleDescription) {
+      activeControl.setAttribute("aria-describedby", this.accessibleDescriptionId);
+    }
   }
 
   private sanitizePlaceholder(value: string): string {
